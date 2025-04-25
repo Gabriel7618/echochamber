@@ -11,7 +11,6 @@ content = extractContent(search)
 results = getarticles(content)
 
 # Classify each result
-bias = classify(results)
 
 for result in results:
     print(result[0] + " at " + result[1])

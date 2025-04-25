@@ -1,2 +1,5 @@
 __pycache__/
 node_modules
+echochamber
+classifier-data/trump_articles.csv
+classifier-data/.ipynb_checkpoints/
