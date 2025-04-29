@@ -8,24 +8,34 @@ client = Groq(
 )
 
 
-def classify(topic, title, body):
-    """
+def classify(topic, title, body, maxlen=2000):
+    prompt = (
+        "Classify this article as being supportive, opposing or neutral about "
+        f"{topic}.\n"
+        "Respond with exactly \"1\" if supportive, \"-1\" if opposing or "
+        "\"0\" if neutral.\n\n"
+        f"Title = \"{title}\"\n\n"
+        f"Body = \"{body[:maxlen]}\""
+    )
+
     chat_completion = client.chat.completions.create(
         messages=[
             {
                 "role": "user",
-                "content": (
-                        "Say Hello World!"
-                    ),
+                "content": prompt,
             }
         ],
         model="llama-3.3-70b-versatile",
     )
 
-    print(chat_completion.choices[0].message.content)
-    """
+    classification = chat_completion.choices[0].message.content
 
-    return 0
+    if "-" in classification:
+        return -1
+    elif "0" in classification:
+        return 0
+    else:
+        return 1
 
 
 if __name__ == "__main__":
@@ -37,17 +47,12 @@ if __name__ == "__main__":
 
     labels = [0, 1, -1]
 
-    topic = "Trump"
-
-    article_n = 30
+    article_n = 15
     is_equal = True
-    is_politics_only = True
-    title_contains = None
-    body_contains = "trump"
 
     test_df = pd.read_csv(
         "classifier-data/trump_articles.csv",
-        usecols=["title", "text", "subject", "label"],
+        usecols=["title", "text", "topic", "label"],
     )
 
 
@@ -64,19 +69,6 @@ if __name__ == "__main__":
 
     test_df["label"] = test_df["label"].map(map_classification)
 
-    if is_politics_only:
-        test_df = test_df.loc[test_df["subject"] == "politicsNews"]
-
-    if title_contains:
-        test_df = test_df.loc[
-            test_df["title"].str.contains(title_contains, case=False)
-        ]
-
-    if body_contains:
-        test_df = test_df.loc[
-            test_df["text"].str.contains(body_contains, case=False)
-        ]
-
     if is_equal:
         pos_test_df = test_df.loc[test_df["label"] == 1]
         pos_test_df = pos_test_df.sample(n=article_n // 3)
@@ -91,7 +83,7 @@ if __name__ == "__main__":
         test_df = test_df.sample(n=article_n)
 
     pred_labels = test_df.apply(
-        lambda row: classify(topic, row["title"], row["text"]),
+        lambda row: classify(row["topic"], row["title"], row["text"]),
         axis=1
     )
 
@@ -103,5 +95,5 @@ if __name__ == "__main__":
 
     print(f"Accuracy: {accuracy}\n")
     print("Confusion Matrix:")
-    print(pd.DataFrame(cm, index=labels, columns=labels))
+    print(pd.DataFrame(cm, index=labels, columns=labels), end="\n\n")
 
