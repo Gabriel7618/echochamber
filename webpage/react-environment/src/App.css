@@ -59,6 +59,7 @@ body {
 }
 
 .search-container {
+  height: 30vh;
   width: 40vw;
   margin: auto;
   padding: 2rem;
@@ -86,7 +87,6 @@ body {
   transition: all 0.9s ease;
 }
   
-
 h1 {
   color: #333;
   margin-bottom: 1rem;
