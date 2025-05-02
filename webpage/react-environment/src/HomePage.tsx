@@ -6,7 +6,7 @@ function HomePage(){
   const navigate = useNavigate();
 
   return (
-    <div className="container">
+    <div className="home-container">
       <h1> Welcome to Breaking Out Of The Social Media Echo Chamber </h1>
 
       <p>

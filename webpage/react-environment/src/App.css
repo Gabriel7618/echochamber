@@ -48,8 +48,8 @@ body {
   background-color: #f5f5f5;
 }
 
-.container {
-  max-width: 800px;
+.home-container {
+  width: 60vw;
   margin: auto;
   padding: 2rem;
   background: white;
@@ -57,6 +57,35 @@ body {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
   margin-top: 0rem;
 }
+
+.search-container {
+  width: 40vw;
+  margin: auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  margin-top: 0rem;
+}
+
+
+.article-container {
+  width: 80vw;
+  height: 80vh;
+  margin: auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  margin-top: 0rem;}
+
+
+
+.search-container,
+.article-container {
+  transition: all 0.9s ease;
+}
+  
 
 h1 {
   color: #333;

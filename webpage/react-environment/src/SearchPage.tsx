@@ -1,6 +1,9 @@
 import { useState } from 'react'
-import { Input, Spin, Button } from "antd"
+import { Input, Spin, Button} from "antd"
 import { useNavigate } from "react-router-dom"
+import { ThreeColumnLayout } from "./components/ThreeColumnLayout";
+import { columnStyle, borderedStyle } from "./components/styles/columnStyles";
+import { PaginatedButtonColumn } from './components/PaginatedButtonColumn';
 
 /* Search component */
 function SearchPage() {
@@ -12,11 +15,13 @@ function SearchPage() {
 
   const navigate = useNavigate(); // allows us to go back to homepage
 
-  const mockResults = {
-    positive: [{ title: "Positive News", excerpt: "Supportive text...", url: "#" }],
-    neutral: [{ title: "Neutral News", excerpt: "Neutral reporting...", url: "#" }],
-    negative: [{ title: "Negative News", excerpt: "Critical text...", url: "#" }],
-  };
+  const mockArticleList = [
+    { title: "First", excerpt: "first excerpt", url: "https://www.wikipedia.org/"},
+    { title: "Second", excerpt: "second excerpt", url: "https://www.wikipedia.org/"},
+    { title: "Third", excerpt: "third excerpt", url: "https://www.wikipedia.org/"},
+    { title: "Fourth", excerpt: "fourth excerpt", url: "https://www.wikipedia.org/"},
+    { title: "Fifth", excerpt: "fifth excerpt", url: "https://www.wikipedia.org/"}
+  ];
 
   // we are defining a function to set the loading screen once a search query has been entered
   const handleSearch = (value: string) => {
@@ -34,10 +39,11 @@ function SearchPage() {
 
   return (
     // page fades in when it loads — using the CSSTransition wrapper
-      <div className="container fade-in">
+    // When displaying articles change the container such that it fills more of the screen
+      <div className={`${!loading && showResults ? "article-container fade-in" : "search-container"} fade-in`}>
         {// adding a back button to homepage //
         }
-        <Button style={{ marginBottom: "1.5rem" }} onClick={() => navigate("/")}>
+        <Button onClick={() => navigate("/")}>
           ← Back to Homepage
         </Button>
 
@@ -65,8 +71,41 @@ function SearchPage() {
         {// if not loading and results ready, show the articles
         }
         {!loading && showResults && (
-          <div>
-            {/* show the 3 col results here */}
+          // Keep the search bar so we can search for something new, make the placeholder text the current query
+          <div className="slower-fade-in">
+          <Input.Search
+          placeholder={query}
+          enterButton="Search"
+          size="large"
+          onSearch={handleSearch}
+          // Positive, Neutral and Negative titles above the three columns
+          />
+          <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+          <ThreeColumnLayout
+          left = {<div style={columnStyle}>
+                    <p style={{ marginBottom: "0rem" }}> <span className="positive"> <strong> Positive</strong></span></p>
+                  </div>}
+          center = {<div style={columnStyle}>
+                      <p style={{ marginBottom: "0rem" }}> <span className="neutral"> <strong> Neutral</strong></span></p>
+                    </div>}
+          right = {<div style={columnStyle}>
+                     <p style={{ marginBottom: "0rem" }}> <span className="negative"> <strong> Negative</strong></span></p>
+                   </div>}
+          />
+          <div style={{ flexGrow: 1 }}>
+          <ThreeColumnLayout
+          left = {<div style={columnStyle}>
+                    <p><PaginatedButtonColumn articles={mockArticleList} /></p>
+                  </div>}
+          center = {<div style={{ ...columnStyle, ...borderedStyle }}>
+                      <p><PaginatedButtonColumn articles={mockArticleList} /></p>
+                    </div>}
+          right = {<div style={columnStyle}>
+                     <p><PaginatedButtonColumn articles={mockArticleList} /></p>
+                   </div>}
+          />
+          </div>
+          </div>
           </div>
         )}
       </div>
