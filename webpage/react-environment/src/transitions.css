@@ -3,7 +3,11 @@
   .fade-in {
     animation: fadeIn 0.9s ease-in-out;
   }
-  
+
+  .slower-fade-in {
+    animation: fadeIn 1.6s ease-in-out;
+  }
+
   @keyframes fadeIn {
     from {
       opacity: 0;
@@ -15,3 +19,4 @@
     }
   }
   
+

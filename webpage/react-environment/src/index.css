@@ -43,3 +43,16 @@ button {
 button:hover {
   border-color: #646cff;
 }
+
+
+/* custom styling for the titles of the news articles which are buttons linking to the source */
+
+.link-button {
+  padding: 0.25rem 0.5rem !important;
+  font-size: 1.2em !important;
+  text-decoration: underline !important;
+}
+
+.link-button:hover {
+  text-decoration: underline !important;
+}
