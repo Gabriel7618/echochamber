@@ -1,6 +1,16 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # or "*" for testing
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
@@ -10,33 +20,19 @@ async def root():
 
 @app.get("/articles/{topic}")
 async def get_articles(topic: str):
-    return {
-        "articles": [
+    return [
 
             {
                 "title": "Test Positive Article",
-                "body": f"I'm talking positively about {topic}",
-                "link": "https://example.org",
-                "date": "03/05/2025",
-                "classification": "1",
+                "excerpt": f"I'm talking positively about {topic}",
+                "url": "https://example.org",
             },
 
             {
-                "title": "Test Negative Article",
-                "body": f"I'm talking negatively about {topic}",
-                "link": "https://example.org",
-                "date": "03/05/2025",
-                "classification": "-1",
+                "title": "Test Positive Article 2",
+                "excerpt": f"I'm talking positively about {topic}",
+                "url": "https://example.org",
             },
 
-            {
-                "title": "Test Neutral Article",
-                "body": f"I'm talking neutrally about {topic}",
-                "link": "https://example.org",
-                "date": "03/05/2025",
-                "classification": "0",
-            },
-
-        ],
-    }
+    ]
 

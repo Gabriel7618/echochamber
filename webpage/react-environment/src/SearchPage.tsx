@@ -12,6 +12,7 @@ function SearchPage() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [articleList, setArticleList] = useState([]);
 
   const navigate = useNavigate(); // allows us to go back to homepage
 
@@ -24,18 +25,26 @@ function SearchPage() {
   ];
 
   // we are defining a function to set the loading screen once a search query has been entered
-  const handleSearch = (value: string) => {
-    setQuery(value);
-    setLoading(true); // these variables have now been updated
-    setShowResults(false);
+	const handleSearch = async (value: string) => {
+		setQuery(value);
+		setLoading(true);
+		setShowResults(false);
 
-    // now we can simulate the loading state (will need to replace this with API call later)
-    setTimeout(() => {
-      console.log("Search complete for:", value);
-      setLoading(false);
-      setShowResults(true); 
-    }, 2000); // fake loading rn 
-  };
+		try {
+			const response = await fetch(`http://127.0.0.1:8000/articles/${encodeURIComponent(value)}`);
+			const data = await response.json();
+			setArticleList(data); // Set articles here
+      console.log(data);
+      console.log("Hello");
+      console.log(articleList);
+		} catch (error) {
+			console.error("Error fetching articles:", error);
+			setArticleList([]);
+		}
+
+		setLoading(false);
+		setShowResults(true);
+	};
 
   return (
     // page fades in when it loads — using the CSSTransition wrapper
@@ -95,7 +104,7 @@ function SearchPage() {
           <div style={{ flexGrow: 1 }}>
           <ThreeColumnLayout
           left = {<div style={columnStyle}>
-                    <p><PaginatedButtonColumn articles={mockArticleList} /></p>
+                    <p><PaginatedButtonColumn articles={articleList} /></p>
                   </div>}
           center = {<div style={{ ...columnStyle, ...borderedStyle }}>
                       <p><PaginatedButtonColumn articles={mockArticleList} /></p>
