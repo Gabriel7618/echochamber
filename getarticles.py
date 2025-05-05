@@ -37,6 +37,9 @@ def DUCKDUCKGO(search):
 def NEWSAPI(search, api_key):
     return f"https://newsapi.org/v2/everything?q={search}&apiKey={api_key}"
 
+def HACKER_NEWS(search):
+    return f"https://hn.algolia.com/api/v1/search?query={search}"
+
 # ======= DATABASE OPERATIONS ========
 def get_cached_links(search):
     conn = sqlite3.connect(DATABASE)
@@ -109,6 +112,19 @@ def getarticles(search, newsapi_key=None):
                     links.append((article["title"], article["url"]))
         except Exception as e:
             print("NewsAPI error:", e)
+
+    # Hacker News
+    try:
+        response = requests.get(HACKER_NEWS(search))
+        if response.status_code == 200:
+            posts = response.json().get("hits", [])
+            for post in posts[:5]:
+                title = post.get("title") or post.get("story_title")
+                url = post.get("url") or f"https://news.ycombinator.com/item?id={post['objectID']}"
+                if title and url:
+                    links.append((title, url))
+    except Exception as e:
+        print("Hacker News error:", e)
 
     # Cache the results
     cache_links(search, links)
