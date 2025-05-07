@@ -8,8 +8,11 @@ nltk.download()
 '''
 
 from groq import Groq
-def groq_topic(text, key, instr):
-    client = Groq(api_key=key)
+from rake_nltk import Rake
+import os
+
+def groq_topic(text, instr):
+    client = Groq(api_key=os.environ.get("GROQ_API_KEY"),)
     
     completion = client.chat.completions.create(
         model="meta-llama/llama-4-scout-17b-16e-instruct",
@@ -35,47 +38,12 @@ def groq_topic(text, key, instr):
     #print(completion.choices[0].message.content)
     return completion.choices[0].message.content
 
-
-
-import openai
-# this function is no longer used because the openai api requires paid credits (which expire too) so i rewrote it using groq like the classifier uses
-def gpt_choice(text, key, instr):
-    # instr = 'I am writing a web app for classifying news articles, I will give you a user prompt. Give me the most likely phrase that is what the user is searching for news articles about:\nDesired format: <most_likely_phrase>'
-    print(key)
-    client = openai.OpenAI(api_key=key)
-    response = client.responses.create(
-        model="gpt-4o",
-        instructions=instr,
-        input=text,
-    )
-    #print(response.output_text)
-    return response.output_text
-
-from rake_nltk import Rake
-def rake(text):
-    r = Rake()
-    r.extract_keywords_from_text(text)
-    phrases = r.get_ranked_phrases()
-    #print(phrases)
-    return phrases
-
-
-def main():
+def extractContent(prompt):
     # rake thing to get list then crossreference with LLM answer
-
-    # Groq API key
-    key = ""
 
     # groq key: 
     with open("prompt.txt", "r", encoding="utf-8") as f:
-            instr = f.read()
-    text = "hi please can you give me some recent news about donald trump, thanks so much!" # this is the user prompt
-    phrases = rake(text)
-    term = groq_topic(text, key, instr)
-    for phrase in phrases:
-        if term == phrase: return phrase
-        else: return term
+        instr = f.read()
 
-
-if __name__ == "__main__":
-    main()
+    term = groq_topic(prompt, instr)
+    return term

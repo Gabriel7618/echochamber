@@ -2,13 +2,9 @@ import os
 
 from groq import Groq
 
-
-client = Groq(
-    api_key=os.environ.get("GROQ_API_KEY"),
-)
-
-
 def classify(topic, title, body, maxlen=2000):
+    client = Groq(api_key=os.environ.get("GROQ_API_KEY"),)
+
     prompt = (
         "Classify this article as being supportive, opposing or neutral about "
         f"{topic}.\n"
