@@ -29,7 +29,7 @@ function SearchPage() {
     setLoading(true); // these variables have now been updated
     setShowResults(false);
 
-    // now we can simulate the loading state (will need to replace this with API call later)
+    // now we can simulate the loading state (will need to replace this with API cal  l later)
     setTimeout(() => {
       console.log("Search complete for:", value);
       setLoading(false);
