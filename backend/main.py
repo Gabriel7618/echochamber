@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from extractcontent import extractContent
+from getarticles import getarticles
+from classifier import classify
 
 app = FastAPI()
 
