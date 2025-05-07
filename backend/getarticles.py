@@ -1,12 +1,14 @@
 import sqlite3
 import time
 import requests
+import os
 from datetime import datetime, timedelta
+from classifier import classify
 
 # ======= CONFIG ========
 DATABASE = "search_cache.db"
 CACHE_DURATION_MINUTES = 30
-NEWSAPI_KEY = "NEWS_API_KEY"
+NEWSAPI_KEY = os.environ.get("NEWSAPI_KEY")
 
 # ======= DB SETUP ========
 def init_db():
@@ -19,9 +21,11 @@ def init_db():
                 )''')
     c.execute('''CREATE TABLE IF NOT EXISTS links (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    classification INTEGER,
                     query_id INTEGER,
                     title TEXT,
                     url TEXT,
+                    body TEXT,
                     FOREIGN KEY(query_id) REFERENCES queries(id)
                 )''')
     conn.commit()
@@ -31,14 +35,14 @@ def init_db():
 def WIKIPEDIA(search):
     return f"https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={search}&format=json"
 
-def DUCKDUCKGO(search):
-    return f"https://api.duckduckgo.com/?q={search}&format=json&no_html=1"
-
 def NEWSAPI(search, api_key):
     return f"https://newsapi.org/v2/everything?q={search}&apiKey={api_key}"
 
 def HACKER_NEWS(search):
     return f"https://hn.algolia.com/api/v1/search?query={search}"
+
+def DUCKDUCKGO(search):
+    return f"https://api.duckduckgo.com/?q={search}&format=json&no_html=1"
 
 # ======= DATABASE OPERATIONS ========
 def get_cached_links(search):
@@ -50,7 +54,7 @@ def get_cached_links(search):
         query_id, timestamp = row
         now = int(time.time())
         if now - timestamp < CACHE_DURATION_MINUTES * 60:
-            c.execute("SELECT title, url FROM links WHERE query_id = ?", (query_id,))
+            c.execute("SELECT title, url, body, classification FROM links WHERE query_id = ?", (query_id,))
             links = c.fetchall()
             conn.close()
             return links
@@ -68,8 +72,9 @@ def cache_links(search, links):
     now = int(time.time())
     c.execute("INSERT OR REPLACE INTO queries (text, timestamp) VALUES (?, ?)", (search, now))
     query_id = c.execute("SELECT id FROM queries WHERE text = ?", (search,)).fetchone()[0]
-    for title, url in links:
-        c.execute("INSERT INTO links (query_id, title, url) VALUES (?, ?, ?)", (query_id, title, url))
+    for title, url, body, classification in links:
+        c.execute("INSERT INTO links (query_id, title, url, body, classification) VALUES (?, ?, ?, ?, ?)",
+                  (query_id, title, url, body, classification))
     conn.commit()
     conn.close()
 
@@ -88,7 +93,11 @@ def getarticles(search, newsapi_key=None):
         if response.status_code == 200:
             content = response.json().get("query", {}).get("search", [])
             for page in content:
-                links.append((page["title"], f"http://en.wikipedia.org/?curid={page['pageid']}"))
+                title = page["title"]
+                url = f"http://en.wikipedia.org/?curid={page['pageid']}"
+                body = page.get("snippet", "")  # This is a short description, could be used as body
+                classification = classify(search, title, body)
+                links.append((title, url, body, classification))
     except Exception as e:
         print("Wikipedia error:", e)
 
@@ -98,7 +107,11 @@ def getarticles(search, newsapi_key=None):
         if response.status_code == 200:
             data = response.json()
             if data.get("AbstractText"):
-                links.append(("DuckDuckGo Abstract", data["AbstractURL"]))
+                title = "DuckDuckGo Abstract"
+                url = data["AbstractURL"]
+                body = data["AbstractText"]
+                classification = classify(search, title, body)
+                links.append((title, url, body, classification))
     except Exception as e:
         print("DuckDuckGo error:", e)
 
@@ -109,7 +122,11 @@ def getarticles(search, newsapi_key=None):
             if response.status_code == 200:
                 articles = response.json().get("articles", [])
                 for article in articles[:5]:
-                    links.append((article["title"], article["url"]))
+                    title = article["title"]
+                    url = article["url"]
+                    body = article.get("description", "")  # Use description as body text
+                    classification = classify(search, title, body)
+                    links.append((title, url, body, classification))
         except Exception as e:
             print("NewsAPI error:", e)
 
@@ -121,8 +138,10 @@ def getarticles(search, newsapi_key=None):
             for post in posts[:5]:
                 title = post.get("title") or post.get("story_title")
                 url = post.get("url") or f"https://news.ycombinator.com/item?id={post['objectID']}"
+                body = post.get("text", "")  # Some posts may contain text, otherwise, we leave it empty
+                classification = classify(search, title, body)
                 if title and url:
-                    links.append((title, url))
+                    links.append((title, url, body, classification))
     except Exception as e:
         print("Hacker News error:", e)
 

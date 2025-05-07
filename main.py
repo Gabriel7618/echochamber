@@ -1,16 +1,12 @@
 from extractcontent import extractContent
-from getarticles import getarticles
-from classifier import classify
+from getarticles import get_articles
 
-search = input("Please enter your search query.\n")
+content = extractContent("Please give me some articles about Donald Trump")
+articles = get_articles(content)
 
-# First, process the search string
-content = extractContent(search)
+res = [[], [], []]
 
-# Now, get the article links from content
-results = getarticles(content)
+for article in articles:
+    res[article['classification']].append({"title": article['title'], "excerpt": article['body'], "url": article['url']})
 
-# Classify each result
-
-for result in results:
-    print(result[0] + " at " + result[1])
+print(res[0], res[1], res[2])
