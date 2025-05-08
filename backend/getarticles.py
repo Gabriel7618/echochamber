@@ -4,6 +4,7 @@ import requests
 import os
 from datetime import datetime, timedelta
 from classifier import classify
+import random
 
 # ======= CONFIG ========
 DATABASE = "search_cache.db"
@@ -91,7 +92,7 @@ def getarticles(search):
     try:
         response = requests.get(WIKIPEDIA(search))
         if response.status_code == 200:
-            content = response.json().get("query", {}).get("search", [])
+            content = response.json().get("query", {}).get("search", [])[:4]
             for page in content:
                 title = page["title"]
                 url = f"http://en.wikipedia.org/?curid={page['pageid']}"
@@ -120,7 +121,8 @@ def getarticles(search):
         response = requests.get(NEWSAPI(search))
         if response.status_code == 200:
             articles = response.json().get("articles", [])
-            for article in articles[:5]:
+            # print(articles)
+            for article in articles[:10]:
                 title = article["title"]
                 url = article["url"]
                 body = article.get("description", "")  # Use description as body text
@@ -147,6 +149,7 @@ def getarticles(search):
     # Cache the results
     cache_links(search, links)
 
+    random.shuffle(links)
     return links
 
 # ======= INIT DB ON IMPORT ========
