@@ -5,6 +5,7 @@ import os
 from datetime import datetime, timedelta
 from classifier import classify
 import random
+import concurrent.futures
 
 # ======= CONFIG ========
 DATABASE = "search_cache.db"
@@ -36,7 +37,10 @@ def init_db():
 def WIKIPEDIA(search):
     return f"https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={search}&format=json"
 
-def NEWSAPI(search):
+def NEWSAPI_EVERYTHING(search):
+    return f"https://newsapi.org/v2/everything?q={search}&apiKey={NEWSAPI_KEY}"
+
+def NEWSAPI_TOP(search):
     return f"https://newsapi.org/v2/top-headlines?q={search}&apiKey={NEWSAPI_KEY}"
 
 def HACKER_NEWS(search):
@@ -88,67 +92,131 @@ def getarticles(search):
 
     links = []
 
-    # Wikipedia
-    try:
-        response = requests.get(WIKIPEDIA(search))
-        if response.status_code == 200:
-            content = response.json().get("query", {}).get("search", [])[:4]
-            for page in content:
-                title = page["title"]
-                url = f"http://en.wikipedia.org/?curid={page['pageid']}"
-                body = page.get("snippet", "")  # This is a short description, could be used as body
-                classification = classify(search, title, body)
-                links.append((title, url, body, classification))
-    except Exception as e:
-        print("Wikipedia error:", e)
+    def fetch_wikipedia():
+        try:
+            response = requests.get(WIKIPEDIA(search))
+            if response.status_code == 200:
+                content = response.json().get("query", {}).get("search", [])[:4]
+                results = []
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    classify_futures = {
+                        executor.submit(classify, search, page["title"], page.get("snippet", "")): page
+                        for page in content
+                    }
+                    for future in concurrent.futures.as_completed(classify_futures):
+                        page = classify_futures[future]
+                        try:
+                            classification = future.result()
+                            results.append((page["title"], f"http://en.wikipedia.org/?curid={page['pageid']}", page.get("snippet", ""), classification))
+                        except Exception as e:
+                            print("Wikipedia classification error:", e)
+                return results
+        except Exception as e:
+            print("Wikipedia error:", e)
+        return []
 
-    # DuckDuckGo
-    try:
-        response = requests.get(DUCKDUCKGO(search))
-        if response.status_code == 200:
-            data = response.json()
-            if data.get("AbstractText"):
-                title = "DuckDuckGo Abstract"
-                url = data["AbstractURL"]
-                body = data["AbstractText"]
-                classification = classify(search, title, body)
-                links.append((title, url, body, classification))
-    except Exception as e:
-        print("DuckDuckGo error:", e)
+    def fetch_duckduckgo():
+        try:
+            response = requests.get(DUCKDUCKGO(search))
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("AbstractText"):
+                    title = "DuckDuckGo Abstract"
+                    url = data["AbstractURL"]
+                    body = data["AbstractText"]
+                    classification = classify(search, title, body)
+                    return [(title, url, body, classification)]
+        except Exception as e:
+            print("DuckDuckGo error:", e)
+        return []
 
-    # NewsAPI
-    try:
-        response = requests.get(NEWSAPI(search))
-        if response.status_code == 200:
-            articles = response.json().get("articles", [])
-            print(articles)
-            for article in articles[:10]:
-                title = article["title"]
-                url = article["url"]
-                body = article.get("description", "")  # Use description as body text
-                classification = classify(search, title, body)
-                links.append((title, url, body, classification))
-    except Exception as e:
-        print("NewsAPI error:", e)
+    def fetch_newsapi_top():
+        try:
+            response = requests.get(NEWSAPI_TOP(search))
+            if response.status_code == 200:
+                articles = response.json().get("articles", [])[:30]
+                results = []
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    classify_futures = {
+                        executor.submit(classify, search, article["title"], article.get("description", "")): article
+                        for article in articles
+                    }
+                    for future in concurrent.futures.as_completed(classify_futures):
+                        article = classify_futures[future]
+                        try:
+                            classification = future.result()
+                            results.append((article["title"], article["url"], article.get("description", ""), classification))
+                        except Exception as e:
+                            print("NewsAPI TOP classification error:", e)
+                return results
+        except Exception as e:
+            print("NewsAPI TOP error:", e)
+        return []
 
-    # Hacker News
-    try:
-        response = requests.get(HACKER_NEWS(search))
-        if response.status_code == 200:
-            posts = response.json().get("hits", [])
-            for post in posts[:5]:
-                title = post.get("title") or post.get("story_title")
-                url = post.get("url") or f"https://news.ycombinator.com/item?id={post['objectID']}"
-                body = post.get("text", "")  # Some posts may contain text, otherwise, we leave it empty
-                classification = classify(search, title, body)
-                if title and url:
-                    links.append((title, url, body, classification))
-    except Exception as e:
-        print("Hacker News error:", e)
+    def fetch_newsapi_everything():
+        try:
+            response = requests.get(NEWSAPI_EVERYTHING(search))
+            if response.status_code == 200:
+                articles = response.json().get("articles", [])[:30]
+                results = []
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    classify_futures = {
+                        executor.submit(classify, search, article["title"], article.get("description", "")): article
+                        for article in articles
+                    }
+                    for future in concurrent.futures.as_completed(classify_futures):
+                        article = classify_futures[future]
+                        try:
+                            classification = future.result()
+                            results.append((article["title"], article["url"], article.get("description", ""), classification))
+                        except Exception as e:
+                            print("NewsAPI EVERYTHING classification error:", e)
+                return results
+        except Exception as e:
+            print("NewsAPI EVERYTHING error:", e)
+        return []
 
-    # Cache the results
+    def fetch_hackernews():
+        try:
+            response = requests.get(HACKER_NEWS(search))
+            if response.status_code == 200:
+                posts = response.json().get("hits", [])[:5]
+                results = []
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    classify_futures = {
+                        executor.submit(classify, search, post.get("title") or post.get("story_title"), post.get("text", "")): post
+                        for post in posts if post.get("title") or post.get("story_title")
+                    }
+                    for future in concurrent.futures.as_completed(classify_futures):
+                        post = classify_futures[future]
+                        try:
+                            classification = future.result()
+                            title = post.get("title") or post.get("story_title")
+                            url = post.get("url") or f"https://news.ycombinator.com/item?id={post['objectID']}"
+                            results.append((title, url, post.get("text", ""), classification))
+                        except Exception as e:
+                            print("Hacker News classification error:", e)
+                return results
+        except Exception as e:
+            print("Hacker News error:", e)
+        return []
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        api_futures = [
+            executor.submit(fetch_wikipedia),
+            executor.submit(fetch_duckduckgo),
+            executor.submit(fetch_newsapi_top),
+            executor.submit(fetch_newsapi_everything),
+            executor.submit(fetch_hackernews),
+        ]
+        for future in concurrent.futures.as_completed(api_futures):
+            try:
+                links.extend(future.result())
+            except Exception as e:
+                print("API thread error:", e)
+
+    # Cache and return
     cache_links(search, links)
-
     random.shuffle(links)
     return links
 
