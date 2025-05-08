@@ -5,6 +5,19 @@ import { ThreeColumnLayout } from "./components/ThreeColumnLayout";
 import { columnStyle, borderedStyle } from "./components/styles/columnStyles";
 import { PaginatedButtonColumn } from './components/PaginatedButtonColumn';
 
+/* Define some data types for our articles and the responce from our API call */
+type Article = {
+  title: string;
+  excerpt: string;
+  url: string;
+};
+
+type ArticleResponse = {
+  supportive: Article[];
+  opposing: Article[];
+  neutral: Article[];
+};
+
 /* Search component */
 function SearchPage() {
   // we are defining two pieces of state: loading = whether to show the loading screen or not
@@ -12,17 +25,26 @@ function SearchPage() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
-  const [articleList, setArticleList] = useState([]);
+
+  const [supportiveArticles, setSupportiveArticles] = useState<Article[]>([]);
+  const [neutralArticles, setNeutralArticles] = useState<Article[]>([]);
+  const [opposingArticles, setOpposingArticles] = useState<Article[]>([]);
 
   const navigate = useNavigate(); // allows us to go back to homepage
 
-  const mockArticleList = [
-    { title: "First", excerpt: "first excerpt", url: "https://www.wikipedia.org/"},
-    { title: "Second", excerpt: "second excerpt", url: "https://www.wikipedia.org/"},
-    { title: "Third", excerpt: "third excerpt", url: "https://www.wikipedia.org/"},
-    { title: "Fourth", excerpt: "fourth excerpt", url: "https://www.wikipedia.org/"},
-    { title: "Fifth", excerpt: "fifth excerpt", url: "https://www.wikipedia.org/"}
-  ];
+  function decodeHtml(html: string) {
+    const txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
+  }
+  
+  function cleanArticles(articles: Article[]) {
+    return articles.map(article => ({
+      title: article.title,
+      excerpt: decodeHtml(article.excerpt.replace(/<[^>]*>/g, "")), // remove HTML tags + decode
+      url: article.url
+    }));
+  }
 
   // we are defining a function to set the loading screen once a search query has been entered
 	const handleSearch = async (value: string) => {
@@ -32,14 +54,21 @@ function SearchPage() {
 
 		try {
 			const response = await fetch(`http://127.0.0.1:8000/articles/${encodeURIComponent(value)}`);
-			const data = await response.json();
-			setArticleList(data); // Set articles here
-      console.log(data);
-      console.log("Hello");
-      console.log(articleList);
+			const data: ArticleResponse = await response.json();
+
+      setSupportiveArticles(cleanArticles(data.supportive));
+      setNeutralArticles(cleanArticles(data.neutral));
+      setOpposingArticles(cleanArticles(data.opposing));
+
+      console.log(data.supportive)
+      console.log(data.neutral)
+      console.log(data.opposing)
+
 		} catch (error) {
 			console.error("Error fetching articles:", error);
-			setArticleList([]);
+			setSupportiveArticles([]);
+      setNeutralArticles([])
+      setOpposingArticles([])
 		}
 
 		setLoading(false);
@@ -104,13 +133,13 @@ function SearchPage() {
           <div style={{ flexGrow: 1 }}>
           <ThreeColumnLayout
           left = {<div style={columnStyle}>
-                    <p><PaginatedButtonColumn articles={articleList} /></p>
+                    <p><PaginatedButtonColumn articles={supportiveArticles} /></p>
                   </div>}
           center = {<div style={{ ...columnStyle, ...borderedStyle }}>
-                      <p><PaginatedButtonColumn articles={mockArticleList} /></p>
+                      <p><PaginatedButtonColumn articles={neutralArticles} /></p>
                     </div>}
           right = {<div style={columnStyle}>
-                     <p><PaginatedButtonColumn articles={mockArticleList} /></p>
+                     <p><PaginatedButtonColumn articles={opposingArticles} /></p>
                    </div>}
           />
           </div>

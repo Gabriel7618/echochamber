@@ -27,7 +27,7 @@ export const PaginatedButtonColumn = ({ articles }: Props) => {
       {currentItems.map((item, index) => (
         <div key={index} style={{ marginBottom: "0.5rem" }}>
           <LinkButton title={item.title} url={item.url} />
-          <div>
+          <div style={{ fontSize: "12px" }}>
             {item.excerpt}
             </div>
         </div>
