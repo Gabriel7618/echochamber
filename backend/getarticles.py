@@ -121,7 +121,7 @@ def getarticles(search):
         response = requests.get(NEWSAPI(search))
         if response.status_code == 200:
             articles = response.json().get("articles", [])
-            # print(articles)
+            print(articles)
             for article in articles[:10]:
                 title = article["title"]
                 url = article["url"]
