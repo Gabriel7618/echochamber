@@ -35,8 +35,8 @@ def init_db():
 def WIKIPEDIA(search):
     return f"https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={search}&format=json"
 
-def NEWSAPI(search, api_key):
-    return f"https://newsapi.org/v2/top-headlines?q={search}&apiKey={api_key}"
+def NEWSAPI(search):
+    return f"https://newsapi.org/v2/top-headlines?q={search}&apiKey={NEWSAPI_KEY}"
 
 def HACKER_NEWS(search):
     return f"https://hn.algolia.com/api/v1/search?query={search}"
@@ -79,7 +79,7 @@ def cache_links(search, links):
     conn.close()
 
 # ======= MAIN FUNCTION ========
-def getarticles(search, newsapi_key=None):
+def getarticles(search):
     # Check cache
     cached = get_cached_links(search)
     if cached:
@@ -116,19 +116,18 @@ def getarticles(search, newsapi_key=None):
         print("DuckDuckGo error:", e)
 
     # NewsAPI
-    if newsapi_key:
-        try:
-            response = requests.get(NEWSAPI(search, newsapi_key))
-            if response.status_code == 200:
-                articles = response.json().get("articles", [])
-                for article in articles[:5]:
-                    title = article["title"]
-                    url = article["url"]
-                    body = article.get("description", "")  # Use description as body text
-                    classification = classify(search, title, body)
-                    links.append((title, url, body, classification))
-        except Exception as e:
-            print("NewsAPI error:", e)
+    try:
+        response = requests.get(NEWSAPI(search))
+        if response.status_code == 200:
+            articles = response.json().get("articles", [])
+            for article in articles[:5]:
+                title = article["title"]
+                url = article["url"]
+                body = article.get("description", "")  # Use description as body text
+                classification = classify(search, title, body)
+                links.append((title, url, body, classification))
+    except Exception as e:
+        print("NewsAPI error:", e)
 
     # Hacker News
     try:
