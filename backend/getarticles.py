@@ -36,7 +36,7 @@ def WIKIPEDIA(search):
     return f"https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch={search}&format=json"
 
 def NEWSAPI(search, api_key):
-    return f"https://newsapi.org/v2/everything?q={search}&apiKey={api_key}"
+    return f"https://newsapi.org/v2/top-headlines?q={search}&apiKey={api_key}"
 
 def HACKER_NEWS(search):
     return f"https://hn.algolia.com/api/v1/search?query={search}"
