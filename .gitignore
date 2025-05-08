@@ -4,3 +4,4 @@ echochamber
 classifier-data/trump_articles.csv
 classifier-data/.ipynb_checkpoints/
 backend/apikey.env
+backend/search_cache.db
