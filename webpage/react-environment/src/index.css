@@ -48,9 +48,17 @@ button:hover {
 /* custom styling for the titles of the news articles which are buttons linking to the source */
 
 .link-button {
+  display: inline-block;             /* Allows width/overflow to apply */
+  max-width: 25vw !important;        /* Constrain the width */
+  overflow: hidden !important;       /* Clip overflowing text */
+  white-space: nowrap !important;    /* Keep text on a single line */
+  text-overflow: ellipsis !important;/* Show "…" on overflow */
   padding: 0.25rem 0.5rem !important;
-  font-size: 1.2em !important;
+  font-size: 1em !important;
   text-decoration: underline !important;
+  text-align: left !important;       /* Ensure text is aligned left */
+  vertical-align: middle;            /* Optional: aligns better inline */
+
 }
 
 .link-button:hover {
