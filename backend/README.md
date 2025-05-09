@@ -17,3 +17,7 @@ To view interactive API docs (for the backend), visit [http://127.0.0.1:8000/doc
 For alternative API docs, visit [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc).
 
 This is the [FastAPI tutorial](https://fastapi.tiangolo.com/tutorial/)
+
+## NEWSAPI
+
+Add your NewsAPI key to os environment using `export NEWSAPI_KEY=...`

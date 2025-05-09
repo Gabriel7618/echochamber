@@ -3,4 +3,5 @@ node_modules
 echochamber
 classifier-data/trump_articles.csv
 classifier-data/.ipynb_checkpoints/
-apikey.env
+backend/apikey.env
+backend/search_cache.db
