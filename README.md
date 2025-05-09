@@ -10,12 +10,9 @@
 
 ## Usage
 
-Copy the environment template:
-In a bash termial do : `cp apikey.env.template apikey.env`
+1. Copy the environment template: In your terminal do `cp apikey.env.template apikey.env`.
 
-Add your own API keys to `apikey.env`.
+2. Add your own API keys to `apikey.env`.
 
-Do `chmod +x start.sh`
-
-and then run `./start.sh`
+3. Do `chmod +x start.sh` and then run `./start.sh`.
 
