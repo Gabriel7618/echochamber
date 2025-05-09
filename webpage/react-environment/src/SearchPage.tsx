@@ -85,7 +85,7 @@ function SearchPage() {
           ← Back to Homepage
         </Button>
 
-        <h1>EchoChamber Search</h1>
+        <h1 style={{marginTop: "0.2rem"}}>EchoChamber Search</h1>
 
         {// if loading show the spinner (aka after user clicks search button)
         }

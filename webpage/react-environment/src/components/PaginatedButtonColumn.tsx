@@ -17,19 +17,34 @@ type Props = {
 selected using ant designs pagination component */
 export const PaginatedButtonColumn = ({ articles }: Props) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 4;
+  const pageSize = 5;
   const startIndex = (currentPage - 1) * pageSize; 
   const endIndex = startIndex + pageSize;
   const currentItems = articles.slice(startIndex, endIndex);
 
   return (
-    <div style={{ textAlign: "left" }}>
+    <div style={{ 
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "space-between",
+      height: "57vh", // Fill available vertical space
+      textAlign: "left" }}>
+
       {currentItems.map((item, index) => (
-        <div key={index} style={{ marginBottom: "0.5rem" }}>
-          <LinkButton title={item.title} url={item.url} />
-          <div style={{ fontSize: "12px" }}>
-            {item.excerpt}
-            </div>
+        <div key={index} style={{ marginBottom: 0 }}>
+          <div style={{ marginLeft: "-0.6em" /* Shift button slightly left */}}> 
+            <LinkButton title={item.title} url={item.url} />
+          </div>
+          <div
+             style={{
+             fontSize: "0.6em",
+             maxHeight: "3rem",   // limit height
+             overflow: "hidden",    // hide any text that doesn't fit
+             whiteSpace: "normal", // allow line breaks
+             wordWrap: "break-word" // break long words if needed
+           }}>
+             {item.excerpt}
+          </div>
         </div>
       ))}
 
@@ -40,7 +55,7 @@ export const PaginatedButtonColumn = ({ articles }: Props) => {
         onChange={setCurrentPage}
         showSizeChanger={false}
         size="small"
-        style={{ marginTop: "1rem", textAlign: "center" }}
+        style={{textAlign: "center" }}
       />
     </div>
   );
