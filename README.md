@@ -5,7 +5,7 @@
 The classifier uses [Groq](https://groq.com/) to query LLMs. 
 
 Do `pip install groq`
-Follow `https://console.groq.com/keys` to create a free account and get an API key
+Follow [Groq key](https://console.groq.com/keys) to create a free account and get an API key
 
 The backend uses NewsAPI to source some articles. 
 
