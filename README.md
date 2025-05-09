@@ -2,11 +2,20 @@
 
 ## API Keys
 
-The classifier uses [Groq](https://groq.com/) to query LLMs. Follow [this tutorial](https://console.groq.com/docs/quickstart) to get an API key.
+The classifier uses [Groq](https://groq.com/) to query LLMs. 
 
-The backend uses NewsAPI to source some articles. Get an API key [here](https://newsapi.org/).
+Do `pip install groq`
+
+Follow [Groq key](https://console.groq.com/keys) to create a free account and get an API key
+
+The backend uses NewsAPI to source some articles. 
+
+Get an API key [here](https://newsapi.org/).
 
 ## Usage
+
+Copy the environment template:
+In a bash termial do : `cp apikey.env.template apikey.env`
 
 Add your own API keys to `apikey.env`.
 

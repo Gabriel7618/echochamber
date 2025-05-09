@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Input, Spin, Button} from "antd"
-import { useNavigate } from "react-router-dom"
+import { Input, Spin } from "antd"
 import { ThreeColumnLayout } from "./components/ThreeColumnLayout";
 import { columnStyle, borderedStyle } from "./components/styles/columnStyles";
 import { PaginatedButtonColumn } from './components/PaginatedButtonColumn';
+import { BreadcrumbNav
 
+ } from './components/breadcrumbNavigation';
 /* Define some data types for our articles and the responce from our API call */
 type Article = {
   title: string;
@@ -29,8 +30,6 @@ function SearchPage() {
   const [supportiveArticles, setSupportiveArticles] = useState<Article[]>([]);
   const [neutralArticles, setNeutralArticles] = useState<Article[]>([]);
   const [opposingArticles, setOpposingArticles] = useState<Article[]>([]);
-
-  const navigate = useNavigate(); // allows us to go back to homepage
 
   function decodeHtml(html: string) {
     const txt = document.createElement("textarea");
@@ -60,8 +59,11 @@ function SearchPage() {
       setNeutralArticles(cleanArticles(data.neutral));
       setOpposingArticles(cleanArticles(data.opposing));
 
+      console.log("Positive Article list:")
       console.log(data.supportive)
+      console.log("Neutral Article list:")
       console.log(data.neutral)
+      console.log("Negative Article list:")
       console.log(data.opposing)
 
 		} catch (error) {
@@ -79,13 +81,10 @@ function SearchPage() {
     // page fades in when it loads — using the CSSTransition wrapper
     // When displaying articles change the container such that it fills more of the screen
       <div className={`${!loading && showResults ? "article-container fade-in" : "search-container"} fade-in`}>
-        {// adding a back button to homepage //
+        {// Add a breadcrumb to allow users to return back to the hompage //
         }
-        <Button onClick={() => navigate("/")}>
-          ← Back to Homepage
-        </Button>
-
-        <h1>EchoChamber Search</h1>
+        <BreadcrumbNav />
+        <h1 style={{marginTop: "0.2rem"}}>EchoChamber Search</h1>
 
         {// if loading show the spinner (aka after user clicks search button)
         }
