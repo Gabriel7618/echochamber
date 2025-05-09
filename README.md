@@ -10,6 +10,10 @@ The backend uses NewsAPI to source some articles.
 
 Get an API key [here](https://newsapi.org/).
 
+The web page uses node.js to run the local server
+
+Install node.js [here](https://nodejs.org/en)
+
 ## Usage
 
 Copy the environment template:
