@@ -11,7 +11,7 @@ pip install -r requirements.txt || pip install "fastapi[all]" "uvicorn[standard]
 
 # --- Start backend in background ---
 echo "Starting FastAPI backend..."
-uvicorn main:app --reload &
+python -m uvicorn main:app --reload &
 BACKEND_PID=$!
 
 # --- Start React frontend ---
