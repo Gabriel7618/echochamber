@@ -1,14 +1,4 @@
-'''
-If this is your first time running this you need to download all the nltk packages so that rake_nltk can use them
-
-oh and nltk and rake_nltk need to be pip installed
-
-import nltk
-nltk.download()
-'''
-
 from groq import Groq
-from rake_nltk import Rake
 import os
 
 def groq_topic(text, instr):
@@ -39,8 +29,6 @@ def groq_topic(text, instr):
     return completion.choices[0].message.content
 
 def extractContent(prompt):
-    # rake thing to get list then crossreference with LLM answer
-
     # groq key: 
     with open("prompt.txt", "r", encoding="utf-8") as f:
         instr = f.read()
