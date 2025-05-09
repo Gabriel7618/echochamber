@@ -1,4 +1,4 @@
-# Breaking out of the social media echochamber
+# Breaking out of the social media echo chamber
 
 ## API Keys
 
