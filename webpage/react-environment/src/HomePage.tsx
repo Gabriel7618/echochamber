@@ -12,7 +12,7 @@ function HomePage(){
         }
       <BreadcrumbNav />
 
-      <h1 className="grassyGreen"> Goodbye Echo Chambers </h1>
+      <h1 className="homeTitle"> Goodbye Echo Chambers </h1>
 
       <p>
         The way we consume news today is often shaped by algorithms that reinforce our existing beliefs -
